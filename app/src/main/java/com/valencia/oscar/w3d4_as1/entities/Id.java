@@ -1,5 +1,5 @@
 
-package com.valencia.oscar.w3d4_ex1.entities;
+package com.valencia.oscar.w3d4_as1.entities;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;

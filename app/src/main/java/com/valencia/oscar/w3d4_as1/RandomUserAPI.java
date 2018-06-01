@@ -1,6 +1,6 @@
-package com.valencia.oscar.w3d4_ex1;
+package com.valencia.oscar.w3d4_as1;
 
-import com.valencia.oscar.w3d4_ex1.entities.UserResponse;
+import com.valencia.oscar.w3d4_as1.entities.UserResponse;
 
 
 import retrofit2.Call;
