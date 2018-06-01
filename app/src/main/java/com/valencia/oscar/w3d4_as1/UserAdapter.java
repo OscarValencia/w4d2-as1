@@ -2,6 +2,7 @@ package com.valencia.oscar.w3d4_as1;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -14,6 +15,7 @@ import android.widget.TextView;
 import com.valencia.oscar.w3d4_ex1.R;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 
 public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
@@ -50,27 +52,46 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
                 userItem.getTitle()+ " "+
                         userItem.getFirstName()+ " "+
                         userItem.getLastName()+" "+
-                        userItem.getEmail()+" "+
-                        userItem.getCity()+" "+
+                        userItem.getEmail()+"\n "+
+                        userItem.getCity()+"\n "+
                         userItem.getPhone()
         );
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-//        try {
-//            Bitmap bitmap = BitmapFactory.decodeStream(new java.net.URL(userItem.getPicture()).openStream());
-//            holder.tvPicture.setImageBitmap(bitmap);
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
+        new DownloadImageTask( holder.tvPicture)
+                .execute(userItem.getPicture());
 
         Log.d(LOG,"Binging item "+userItem.getFirstName()+" "+userItem.getLastName());
-
-
     }
 
     @Override
     public int getItemCount() {
         return dataSet == null ? 0 :dataSet.size();
+    }
+
+    private class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
+        ImageView bmImage;
+
+        public DownloadImageTask(ImageView bmImage) {
+            this.bmImage = bmImage;
+        }
+
+        protected Bitmap doInBackground(String... urls) {
+            String urldisplay = urls[0];
+            Bitmap mIcon11 = null;
+            try {
+                InputStream in = new java.net.URL(urldisplay).openStream();
+                mIcon11 = BitmapFactory.decodeStream(in);
+            } catch (Exception e) {
+                Log.e("Error", e.getMessage());
+                e.printStackTrace();
+            }
+            return mIcon11;
+        }
+
+        protected void onPostExecute(Bitmap result) {
+            bmImage.setImageBitmap(result);
+        }
     }
 
 
