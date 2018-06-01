@@ -1,22 +1,21 @@
 package com.valencia.oscar.w3d4_ex1;
 
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.util.Iterator;
+import com.valencia.oscar.w3d4_ex1.entities.UserResponse;
+import com.valencia.oscar.w3d4_ex1.entities.Result;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener{
 
@@ -24,6 +23,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Button jsonObjectBT,jsonArrayBT;
     private ProgressBar progressBar;
     private TextView textView;
+    private RandomUserAPI userAPI;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -35,45 +35,70 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View v) {
         switch(v.getId()){
             case R.id.btnGetObject:
-                getVolleyJSONObject();
+                getRandomUser();
                 break;
             case R.id.btnGetArray:
-                getVolleyJSONArray();
+                getRandomUsers();
                 break;
         }
     }
 
-    private void getVolleyJSONObject() {
-        String url = "https://randomuser.me/api";
-        String REQUEST_TAG = "com.valencia.oscar.w3d4_ex1.volleyJsonObjectRequest";
-        // show progress
+    private void getRandomUsers(){
         showProgress(true);
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(url, null,
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        Log.d(TAG,"onResponse: "+response.toString());
-                        Info info = getInfoFromJSONObject(response);
-                        textView.setText(info.getSeed());
-                        Log.d(TAG,"onResponse: seed "+info.getSeed());
-
-                        showProgress(false);
+        getRandomUserAPI().getRandomUsers(5).enqueue(new Callback<UserResponse>() {
+            @Override
+            public void onResponse(Call<UserResponse> call, Response<UserResponse> response) {
+                if(response.isSuccessful()){
+                    UserResponse userResponse = response.body();
+                    for(Result result :userResponse.getResults()){
+                        Log.d(TAG, "onResponse: " + result.getName().getFirst());
                     }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Log.d(TAG,"onErrorResponse"+error.getMessage());
-                        showProgress(false);
-                    }
-                });
-        AppSingleton.getInstance(getApplicationContext())
-                .addToRequestQueue(jsonObjectRequest,REQUEST_TAG);
+                }
+                showProgress(false);
+            }
 
+            @Override
+            public void onFailure(Call<UserResponse> call, Throwable t) {
+
+            }
+        });
     }
-    private void getVolleyJSONArray() {
-        Toast.makeText(this,"NOT IMPLEMENTED",Toast.LENGTH_SHORT).show();
-        Log.i(TAG,"getVolleyJSONArray: feature not implemented");
+
+    private void getRandomUser(){
+        showProgress(true);
+        getRandomUserAPI().getRandomUser().enqueue(new Callback<UserResponse>() {
+            @Override
+            public void onResponse(Call<UserResponse> call, Response<UserResponse> response) {
+                if(response.isSuccessful()){
+                    UserResponse userRes = response.body();
+                    textView.setText(userRes.getInfo().getSeed());
+                    Log.d(TAG, "onResponse: seed" + userRes.getInfo().getSeed());
+                }else{
+                    Log.e(TAG, "onResponse: server error");
+                }
+                showProgress(false);
+            }
+
+            @Override
+            public void onFailure(Call<UserResponse> call, Throwable t) {
+                Log.e(TAG, "onFailure: no network access");
+                showProgress(false);
+            }
+        });
+    }
+
+    private Retrofit prepareRetrofitClient() {
+        return new Retrofit.Builder()
+                .baseUrl(RandomUserAPI.BASE_URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+    }
+
+    private RandomUserAPI getRandomUserAPI(){
+        if(userAPI == null){
+            userAPI = prepareRetrofitClient().create(RandomUserAPI.class);
+        }
+        return userAPI;
     }
 
     private void showProgress(boolean isEnabled){
@@ -91,20 +116,5 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         jsonObjectBT.setOnClickListener(this);
         progressBar = findViewById(R.id.progress);
         textView = findViewById(R.id.tvResponse);
-    }
-
-    private Info getInfoFromJSONObject(JSONObject response){
-        Info info = null;
-        try {
-            JSONObject jsonObject = response.getJSONObject("info");
-            String seed = jsonObject.getString("seed");
-            int results = jsonObject.getInt("results");
-            int page = jsonObject.getInt("page");
-            String version = jsonObject.getString("version");
-            info = new Info(seed,results,page,version);
-        }catch(JSONException e){
-            e.printStackTrace();;
-        }
-        return info;
     }
 }
