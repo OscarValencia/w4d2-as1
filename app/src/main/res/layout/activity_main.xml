@@ -6,33 +6,27 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.valencia.oscar.w3d4_as1.MainActivity">
+    tools:context="com.valencia.oscar.w4d2_as1.MainActivity">
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Retrofit Exercise"/>
+        android:text="w4d2-as1"/>
+
+    <EditText
+        android:id="@+id/searchET"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Enter value"/>
     <Button
         android:id="@+id/btnGetObject"
-        android:text="GET JSON OBJECT"
+        android:text="Search Books"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
     <Button
-        android:id="@+id/btnGetArray"
-        android:text="GET JSON ARRAY"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
-
-    <Button
-        android:id="@+id/btnSave"
-        android:text="Save User"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
-
-    <Button
-        android:id="@+id/btnViewUsers"
-        android:text="View Saved Users"
+        android:id="@+id/btnResults"
+        android:text="View Results"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 

@@ -1,4 +1,4 @@
-package com.valencia.oscar.w3d4_as1;
+package com.valencia.oscar.w4d2_as1;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -12,10 +12,13 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.model.GlideUrl;
+import com.bumptech.glide.request.RequestOptions;
 import com.valencia.oscar.w3d4_ex1.R;
 
-import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
 
 public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
@@ -49,19 +52,18 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         UserItem userItem = dataSet.get(position);
         holder.tvUser.setText(
-                userItem.getTitle()+ " "+
-                        userItem.getFirstName()+ " "+
-                        userItem.getLastName()+" "+
-                        userItem.getEmail()+"\n "+
-                        userItem.getCity()+"\n "+
-                        userItem.getPhone()
+                        "Title: "+userItem.getTitle()+ "\n"+
+                        "Subtitle: "+(userItem.getSubtitle()==null?"":userItem.getSubtitle())+"\n"+
+                        "Authors: "+userItem.getAuthors()
         );
-        BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-        new DownloadImageTask( holder.tvPicture)
-                .execute(userItem.getPicture());
 
-        Log.d(LOG,"Binging item "+userItem.getFirstName()+" "+userItem.getLastName());
+        RequestOptions options = new RequestOptions().placeholder(R.drawable.ic_holder).error(R.drawable.ic_holder);
+        Glide
+                .with(holder.tvPicture.getContext())
+                .load(userItem.getThumbnail())
+                .apply(options)
+                .into(holder.tvPicture);
+        Log.d(LOG,"Binging item "+userItem.getId()+" "+userItem.getTitle());
     }
 
     @Override
@@ -69,30 +71,6 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
         return dataSet == null ? 0 :dataSet.size();
     }
 
-    private class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
-        ImageView bmImage;
-
-        public DownloadImageTask(ImageView bmImage) {
-            this.bmImage = bmImage;
-        }
-
-        protected Bitmap doInBackground(String... urls) {
-            String urldisplay = urls[0];
-            Bitmap mIcon11 = null;
-            try {
-                InputStream in = new java.net.URL(urldisplay).openStream();
-                mIcon11 = BitmapFactory.decodeStream(in);
-            } catch (Exception e) {
-                Log.e("Error", e.getMessage());
-                e.printStackTrace();
-            }
-            return mIcon11;
-        }
-
-        protected void onPostExecute(Bitmap result) {
-            bmImage.setImageBitmap(result);
-        }
-    }
 
 
 }
